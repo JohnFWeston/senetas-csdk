@@ -1,0 +1,12 @@
+debian-targets.patch
+man-section.patch
+no-symbolic.patch
+pic.patch
+c_rehash-compat.patch
+Set-systemwide-default-settings-for-libssl-users.patch
+c_rehash-Do-not-use-shell-to-invoke-openssl.patch
+Fix-file-operations-in-c_rehash.patch
+Update-expired-SCT-certificates.patch
+ct_test.c-Update-the-epoch-time.patch
+Update-further-expiring-certificates-that-affect-tests.patch
+56ar3_and_56br2_snts

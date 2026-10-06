@@ -1,0 +1,11 @@
+
+3108 : 0xa85b4bab30 : 3 : logger_init :  LOG FILE OPENED (by collectunits.logger), level: 4
+3108 : 0xa85bf5c996 : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa85cda637a : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa862d131bc : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa86a3cfb48 : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa87088227f : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa87b59f656 : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa87c3848c0 : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0
+3108 : 0xa87c918d70 : 4 : pytrace_start_profiling :  [CALLED]
+3108 : 0xa87d78a44a : 4 : pytrace_try_probe_python_functions :  Python version is detected as == 0x0

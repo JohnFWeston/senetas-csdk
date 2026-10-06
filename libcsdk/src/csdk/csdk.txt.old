@@ -1,0 +1,39 @@
+# Copyright 1999-2022 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the OpenSSL license (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+# Function codes
+CSDK_F_CSDK_128_CFB_CIPHER:100:csdk_128_cfb_cipher
+CSDK_F_CSDK_128_CFB_INIT_KEY:101:csdk_128_cfb_init_key
+CSDK_F_CSDK_128_CTR_CIPHER:102:csdk_128_ctr_cipher
+CSDK_F_CSDK_128_CTR_INIT_KEY:103:csdk_128_ctr_init_key
+CSDK_F_CSDK_128_GCM_CIPHER:104:csdk_128_gcm_cipher
+CSDK_F_CSDK_128_GCM_CTRL:105:csdk_128_gcm_ctrl
+CSDK_F_CSDK_128_GCM_INIT_KEY:106:csdk_128_gcm_init_key
+CSDK_F_CSDK_256_CFB_CIPHER:107:csdk_256_cfb_cipher
+CSDK_F_CSDK_256_CFB_INIT_KEY:108:csdk_256_cfb_init_key
+CSDK_F_CSDK_256_CTR_CIPHER:109:csdk_256_ctr_cipher
+CSDK_F_CSDK_256_CTR_INIT_KEY:110:csdk_256_ctr_init_key
+CSDK_F_CSDK_256_GCM_CIPHER:111:csdk_256_gcm_cipher
+CSDK_F_CSDK_256_GCM_CTRL:112:csdk_256_gcm_ctrl
+CSDK_F_CSDK_256_GCM_INIT_KEY:113:csdk_256_gcm_init_key
+CSDK_F_CSDK_BIND_HELPER:114:csdk_bind_helper
+CSDK_F_CSDK_CIPHER_128_CFB:115:csdk_cipher_128_cfb
+CSDK_F_CSDK_CIPHER_128_CTR:116:csdk_cipher_128_ctr
+CSDK_F_CSDK_CIPHER_128_GCM:117:csdk_cipher_128_gcm
+CSDK_F_CSDK_CIPHER_256_CFB:118:csdk_cipher_256_cfb
+CSDK_F_CSDK_CIPHER_256_CTR:119:csdk_cipher_256_ctr
+CSDK_F_CSDK_CIPHER_256_GCM:120:csdk_cipher_256_gcm
+
+#Reason codes
+CSDK_R_CALLED:100:called
+CSDK_R_ENGINE_BIND_INIT_FAILED:101:engine bind init failed
+CSDK_R_ENGINE_BIND_NAME_FAILED:102:engine bind name failed
+CSDK_R_ENGINE_BIND_SET_CIPHERS_FAILED:103:engine bind set ciphers failed
+CSDK_R_ENGINE_BIND_SET_DESTROY_FAILED:104:engine bind set destroy failed
+CSDK_R_ENGINE_BIND_SET_FAILED:105:engine bind set failed
+CSDK_R_ENGINE_BIND_SET_FINISH_FAILED:106:engine bind set finish failed
+CSDK_R_FAILED:107:failed

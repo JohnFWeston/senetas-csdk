@@ -1,0 +1,868 @@
+// [ kcmvp hooks
+//
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+//
+//
+//
+//
+//
+//
+
+//
+//!!!!!!!!!!!!!!!!!!!!!!
+// #include "./kcmvp/header/klib.h
+1!!!!!!!!!!!!!!!!!!!!!!
+
+int csdk_get_info( char ** info )
+{
+    KL_INFO klibinfo;
+    K_CurrState(&klibinfo);
+	
+    int ret = asprintf(info, "KLIB v%u.%u, %s, lib v%u.%u, state (%ul)\n",
+		    	klibinfo.klapiVersion.major, 
+		    	klibinfo.klapiVersion.minor, 
+		    	klibinfo.libraryDescription, 
+		    	klibinfo.libraryVersion.major, 
+		    	klibinfo.libraryVersion.minor,
+			klibinfo.klib_mod_state);
+    if (ret < 0)
+	*info = NULL;
+    return ret;
+}
+
+	Menu_ARIA_Enc_Dec_SinglePart(); // ARIA128/192/256
+
+    // ARIA block
+    #define KL_ARIA_BLOCK_BYTE_LEN          16
+	#define KL_ARIA128_KEY_BYTE_LEN         16
+	#define KL_ARIA192_KEY_BYTE_LEN         24
+	#define KL_ARIA256_KEY_BYTE_LEN         32	
+	#define KL_ARIA_KEY_BYTE_LEN            KL_ARIA128_KEY_BYTE_LEN //±âº»Å° Å©±â 128-bit
+
+        // ARIA
+        KLO_CTX_ARIA_ECB,
+        KLO_CTX_ARIA_CFB,
+        KLO_CTX_ARIA_CTR,
+        KLO_CTX_ARIA_GCM,
+
+    enum KLE_COMMON_ERROR {
+        KLR_ARGUMENTS_BAD = 1000,				 // ÀÔÃâ·Â¸Å°³º¯¼ö(KL_CONTEXT, KL_OBJECT, µî)ÀÇ Æ÷ÀÎÅÍ°¡ NULLÀÎ°æ¿ì
+
+        KLR_CTX_NOT_SUPPORTED,                   // Áö¿øÇÏÁö ¾Ê´Â ÀÛ¾÷ ¼öÇà
+
+        KLR_INPUT_DATA_EMPTY,                    // ÀÔ·Â KL_OBJECTÀÇ ÇÏ³ª ÀÌ»óÀÇ
+                                                 // KL_ATTRIBUTEÀÇ µ¥ÀÌÅÍ ÀÔ·Â(µ¥ÀÌÅÍ °ø°£)ÀÌ
+                                                 // ¿Ã¹Ù¸£Áö ¾ÊÀº °æ¿ì
+
+        KLR_DATA_LENGTH_INVALID,				 // ÀÔ·Â/Ãâ·Â KL_OBJECTÀÇ ÇÏ³ª ÀÌ»óÀÇ
+                                                 // KL_ATTRIBUTEÀÇ µ¥ÀÌÅÍ ±æÀÌ°¡
+                                                 // ¿Ã¹Ù¸£Áö ¾ÊÀº °æ¿ì
+
+        KLR_OUTBUFFER_NULL,                      // Ãâ·Â°ªÀÌ Á¸ÀçÇÔ¿¡µµ NULLÀÎ °æ¿ì
+
+        KLR_KEY_TYPE_NOT_SUPPORTED,              // Áö¿øµÇÁö ¾Ê´Â Å° Å¸ÀÔ
+
+        KLR_BUFFER_TOO_SMALL,                    // Ãâ·ÂÇÒ ¹öÆÛÀÇ Å©±â°¡ ÃæºÐÈ÷
+                                                 // Å©Áö ¾ÊÀ½
+
+        KLR_DRBG_GEN_RANDOM_FAILED,              // DRBG ³­¼ö »ý¼º ½ÇÆÐ
+        KLR_FILE_IO_ERROR,                       // ÆÄÀÏ ÀÔÃâ·Â ¿¡·¯
+        KLR_MEM_ALLOC_FAILED,                    // ¸Þ¸ð¸®ÇÒ´ç ½ÇÆÐ
+        KLR_KEY_DECODE_FAILED,                   // Å° µðÄÚµù ½ÇÆÐ
+		KLR_KEY_LENGTH_INVALID,					 // Áö¿øµÇÁö ¾Ê´Â Å° ±æÀÌ (RSAÀÇ °æ¿ì, NÀÇ ºñÆ® Å©±â)
+
+
+        // CMVP
+        KLR_MODULE_NOT_INITIALIZED,              // ¸ðµâÀÌ ÃÊ±âÈ­µÇÁö ¾ÊÀ½
+        KLR_MODULE_SELFTEST_FAILED,              // ¸ðµâ ÀÚ°¡½ÃÇè ½ÇÆÐ(³»ºÎ»ç¿ë)
+        KLR_MODULE_DRBG_SELFTEST_FAILED,         // ¸ðµâ ³­¼ö»ý¼º±â ÀÚ°¡½ÃÇè ½ÇÆÐ
+        KLR_MODULE_ENTROPY_SELFTEST_FAILED,      // ¸ðµâ ¿£Æ®·ÎÇÇ ÀÚ°¡½ÃÇè ½ÇÆÐ
+        KLR_MODULE_ECDSA_SELFTEST_FAILED,        // ¸ðµâ ECDSA ÀÚ°¡½ÃÇè ½ÇÆÐ
+        KLR_MODULE_KEYPAIRGEN_SELFTEST_FAILED,   // ¸ðµâ Å° »ý¼º ÀÚ°¡½ÃÇè ½ÇÆÐ
+        KLR_MODULE_STATE_UNDEFINED,              // ¸ðµâÀÌ ¹ÌÁöÀÇ »óÅÂÀÓ
+
+        KLR_MODULE_STATE_ILLEGAL_CHANGE,         // ¸ðµâÀÌ Çã¿ëµÇÁö ¾ÊÀº »óÅÂ¿¡ 
+                                                 // ÀÖÀ½
+
+        KLR_MODULE_ERROR_STATE,                  // ¸ðµâÀÌ ¿¡·¯»óÅÂ¿¡ ÀÖÀ½
+        KLR_MODULE_FINAL_STATE,                  // ¸ðµâÀÌ Á¾·á»óÅÂ¿¡ ÀÖÀ½
+
+        KLR_MODULE_STATE_DISAPPR_ALG,            // ÇöÀç »óÅÂ¿¡¼­ Çã¿ëÇÏÁö ¾Ê´Â
+                                                 // ¾Ë°í¸®ÁòÀÓ
+
+        KLR_MODULE_INTEGRITY_CHECK_FAILED,       // ¸ðµâ ¹«°á¼º°Ë»ç¿¡ ½ÇÆÐ
+        
+		KLR_ALG_SELFTEST_FAILED,				 // ¾ÏÈ£¾Ë°í¸®Áò ÀÚ°¡½ÃÇè ½ÇÆÐ(¿ÜºÎ³ëÃâ)
+    };
+
+    KL_RV K_EncryptInit(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poKey);
+
+    KL_RV K_Encrypt(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poData,
+        KL_OBJECT_PTR   poEncryptedData);
+
+    KL_RV K_EncryptUpdate(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poPart,
+        KL_OBJECT_PTR   poEncryptedPart);
+
+    KL_RV K_EncryptFinal(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poLastEncryptedPart);
+
+    KL_RV K_DecryptInit(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poKey);
+
+    KL_RV K_Decrypt(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poEncryptedData,
+        KL_OBJECT_PTR   poData);
+
+    KL_RV K_DecryptUpdate(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poEncryptedPart,
+        KL_OBJECT_PTR   poPart);
+
+    KL_RV K_DecryptFinal(
+        KL_CONTEXT_PTR  poCtx,
+        KL_OBJECT_PTR   poLastPart);
+
+
+
+    typedef struct _KLIB_APP_INTERFACE
+    {
+        PK_GETERRORMSG                  pK_GetErrorMsg;
+        PK_GETINFO                      pK_GetInfo;
+        PK_CLEARSENSITIVE               pK_ClearSensitive;
+
+        // Key management
+        PK_GENERATEKEYPAIR              pK_GenerateKeyPair;
+        PK_GENERATEKEY                  pK_GenerateKey;
+
+        PK_DERIVEKEY                    pK_DeriveKey;
+
+        // Encryption 
+        PK_ENCRYPTINIT                  pK_EncryptInit;
+        PK_ENCRYPT                      pK_Encrypt;
+        PK_ENCRYPTUPDATE                pK_EncryptUpdate;
+        PK_ENCRYPTFINAL                 pK_EncryptFinal;
+
+        // Decryption
+        PK_DECRYPTINIT                  pK_DecryptInit;
+        PK_DECRYPT                      pK_Decrypt;
+        PK_DECRYPTUPDATE                pK_DecryptUpdate;
+        PK_DECRYPTFINAL                 pK_DecryptFinal;
+
+        // Sign
+        PK_SIGNINIT                     pK_SignInit;
+        PK_SIGN                         pK_Sign;
+        PK_SIGNUPDATE                   pK_SignUpdate;
+        PK_SIGNFINAL                    pK_SignFinal;
+
+        // Verify
+        PK_VERIFYINIT                   pK_VerifyInit;
+        PK_VERIFY                       pK_Verify;
+        PK_VERIFYUPDATE                 pK_VerifyUpdate;
+        PK_VERIFYFINAL                  pK_VerifyFinal;
+
+        // Random
+        PK_SEEDRANDOM                   pK_SeedRandom;
+        PK_GENERATERANDOM               pK_GenerateRandom;
+
+        // Message digest
+        PK_DIGESTINIT                   pK_DigestInit;
+        PK_DIGEST                       pK_Digest;
+        PK_DIGESTUPDATE                 pK_DigestUpdate;
+        PK_DIGESTFINAL                  pK_DigestFinal;
+
+        // Utility
+        PK_HEXDUMP                      pK_HexDump;
+        PK_FHEXDUMP                     pK_FHexDump;
+        PK_THEXDUMP                     pK_THexDump;
+
+        // CMVP module management
+        PK_KLIBSTART                    pK_KlibStart;
+        PK_KLIBTERMINATE                pK_KlibTerminate;
+
+        PK_CURRSTATE                    pK_CurrState;
+        PK_STATECHANGE                  pK_StateChange;
+
+        PK_SELFTEST                     pK_SelfTest;
+    } KL_APP_INTERFACE, *KL_APP_INTERFACE_PTR;
+
+	KL_RV _35ad167b_d64d_4060_84b1_e42f480ad434 (KL_APP_INTERFACE_PTR pobj);
+
+
+#ifdef PRINT_MULTI_PART
+	//Multi Part : (1) K_EncryptInit() (2) K_EncryptUpdate()-1 (3) K_EncryptUpdate()-2 (4) K_EncryptFinal()
+	Menu_ARIA_Enc_Dec_MultiPart(); // ARIA128/192/256
+	Menu_SEED_Enc_Dec_MultiPart(); // SEED
+	Menu_LEA_Enc_Dec_MultiPart();  // LEA128/192/256
+	Menu_HIGHT_Enc_Dec_MultiPart();// HIGHT
+
+#ifndef DISAPPROVAL_ALG_ON_APPROVAL_MODE
+	if (klibinfo.klib_mod_stat == KLS_MODULE_DISAPPROVAL)
+#endif
+	{
+		Menu_AES_Enc_Dec_MultiPart();  // AES128/192/256
+		Menu_TDES_Enc_Dec_MultiPart(); // TDES - Note : Only 2key-mode is supported.
+	}
+#endif
+
+}
+
+void T_Block_Enc_Dec_SinglePart(int op_mode, int keylen)
+{
+        KLO_CTX_ARIA_CFB,
+        KLO_CTX_ARIA_CTR,
+        KLO_CTX_ARIA_GCM,
+
+	//keygeneration
+	KL_BYTE SecretKeyBuf[32] = {0x00, }; //Maximum Key Len : 32. Note : This buf size can be 16, 24 or 32 according to the block cipher. 
+	KL_OBJECT oKey = {
+		{KLO_SECRET_KEY, NULL, 0, FALSE, FALSE},
+		{KLA_VALUE, SecretKeyBuf, 0, TRUE, FALSE},
+	};
+
+	//For Encryption/Decryption
+	KL_BYTE iv[16] = {0xba,0x8c,0x2b,0x53,0xf2,0x9b,0x7f,0xd6,0xd3,0x37,0x7f,0xba,0x29,0x12,0x21,0x7d}; //Maximum IV Len : 16. Note : This buf size can be 16 or 8 according to the block cipher. 
+	KL_CONTEXT encctx = {
+		{op_mode, NULL, 0, FALSE, FALSE},
+		{ KLA_BLOCK_IV, iv, 0, FALSE, FALSE},
+	};
+
+	//For Data(Plaintext or Ciphertext)
+	KL_BYTE DataBuf[16] = { 0x00, };
+	KL_OBJECT oData = {
+		{KLO_DATA,	NULL,	 0, FALSE, FALSE},
+		{KLA_VALUE, DataBuf, sizeof(DataBuf), FALSE, FALSE}
+	};
+
+	//For Encryption Output
+	KL_BYTE_PTR EncDataBuf = NULL;
+	KL_OBJECT oEncryptedData = {
+		{KLO_DATA,	NULL, 0, FALSE, FALSE},
+		{KLA_VALUE, EncDataBuf, 0, FALSE, FALSE}
+	};
+
+	//For Decryption Output
+	KL_BYTE_PTR DecDataBuf = NULL;
+	KL_OBJECT oDecryptedData = {
+		{KLO_DATA,	NULL, 0, FALSE, FALSE},
+		{KLA_VALUE, DecDataBuf, 0, FALSE, FALSE}
+	};
+
+	KL_RV ret;
+
+	//Step1 - ÆÄ¶ó¹ÌÅÍ ¼³Á¤
+	switch(op_mode)
+	{
+			/*ARIA*/
+		case KLO_CTX_ARIA_CBC:
+		case KLO_CTX_ARIA_CBC_PAD:
+		case KLO_CTX_ARIA_OFB:
+		case KLO_CTX_ARIA_CFB:
+		case KLO_CTX_ARIA_CTR:
+		case KLO_CTX_ARIA_CTR_PAD:
+			encctx[1].type = KLA_BLOCK_IV;
+			encctx[1].ulValueLen = KL_ARIA_BLOCK_BYTE_LEN;	//IV  Len : must be the same as the block size
+		case KLO_CTX_ARIA_ECB:								//Note : ECB does note require IV
+		case KLO_CTX_ARIA_ECB_PAD:
+			oKey[1].ulValueLen = keylen;					//Key Len : This chooses one of versions(ARIA128, ARIA192, ARIA256)
+
+			break;
+
+			/*SEED*/
+		case KLO_CTX_SEED_CBC:
+		case KLO_CTX_SEED_CBC_PAD:
+		case KLO_CTX_SEED_OFB:
+		case KLO_CTX_SEED_CFB:
+		case KLO_CTX_SEED_CTR:
+		case KLO_CTX_SEED_CTR_PAD:
+			encctx[1].type = KLA_BLOCK_IV;
+			encctx[1].ulValueLen = KL_SEED_BLOCK_BYTE_LEN;	//IV  Len : must be the same as the block size
+	}
+	if (encctx[1].ulValueLen != 0)
+		K_HexDump(encctx[1].pValue, encctx[1].ulValueLen, "iv");
+	K_HexDump(oData[1].pValue, oData[1].ulValueLen, "input data");
+
+	//Step 2 - Å°»ý¼º : K_GenerateKey
+	//// oKey¿¡ Å°¸¦ Á÷Á¢ ³Ö¾îÁÖ¾îµµµÈ´Ù. 
+	if ((ret = K_GenerateKey(&keygenctx, (KL_OBJECT_PTR)&oKey)) != KLR_OK)
+	{
+		printf("K_GenerateKey failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	K_HexDump(oKey[1].pValue, oKey[1].ulValueLen, "Key");
+
+	
+	//////////////////////////////////////////
+	//¾ÏÈ£È­ ¼öÇà : K_EncryptInit - K_Encrypt
+	//////////////////////////////////////////
+
+	//Step 3 - ÄÁÅØ½ºÆ® ÃÊ±âÈ­ : K_EncryptInit
+	if( (ret = K_EncryptInit(&encctx,(KL_OBJECT_PTR)&oKey)) != KLR_OK )
+	{
+		printf("K_EncryptInit failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+
+	//Step 4 - Ãâ·Â Å©±â¸¦ ±¸ÇÑ´Ù. : K_Encrypt
+	////(Optional) Ãâ·Â Å©±â¸¦ ¹ÝÈ¯, ÇØ´ç StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oEncryptedData[1].pValue = NULL;
+	if ((ret = K_Encrypt(&encctx, (KL_OBJECT_PTR)&oData,
+		(KL_OBJECT_PTR)&oEncryptedData)) != KLR_OK)
+	{
+		printf("K_Encrypt(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oEncryptedData[1].pValue = (KL_BYTE_PTR)malloc(oEncryptedData[1].ulValueLen);
+	
+	//Step 5 - ¾ÏÈ£È­ : K_Encrypt
+	if( (ret = K_Encrypt(&encctx, (KL_OBJECT_PTR)&oData,
+		(KL_OBJECT_PTR)&oEncryptedData)) != KLR_OK )
+	{
+		printf("K_Encrypt failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+	K_HexDump(oEncryptedData[1].pValue, oEncryptedData[1].ulValueLen, "encrypted data");
+
+
+	//////////////////////////////////////////
+	//º¹È£È­ ¼öÇà : K_DecryptInit - K_Decrypt
+	//////////////////////////////////////////
+	
+	//Step 3 - ÄÁÅØ½ºÆ® ÃÊ±âÈ­ : K_DecryptInit
+	if( (ret = K_DecryptInit(&encctx,
+		(KL_OBJECT_PTR)&oKey)) != KLR_OK )
+	{
+		printf("K_DecryptInit failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+	
+	//Step 4 - Ãâ·Â Å©±â¸¦ ±¸ÇÑ´Ù. : K_Decrypt
+	////(Optional) Ãâ·Â Å©±â¸¦ ¹ÝÈ¯, ÇØ´ç StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oDecryptedData[1].pValue = NULL;
+	if ((ret = K_Decrypt(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData,
+		(KL_OBJECT_PTR)&oDecryptedData)) != KLR_OK)
+	{
+		printf("K_Decrypt(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oDecryptedData[1].pValue = (KL_BYTE_PTR)malloc(oDecryptedData[1].ulValueLen);
+
+	//Step 5 - º¹È£È­ : K_Decrypt
+	if( (ret = K_Decrypt(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData,
+		(KL_OBJECT_PTR)&oDecryptedData)) != KLR_OK )
+	{
+		printf("K_Decrypt failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+	K_HexDump(oDecryptedData[1].pValue, oDecryptedData[1].ulValueLen, "decrypted data");
+
+
+err:
+	//»ç¿ë ÄÁÅØ½ºÆ®, ¿ÀºêÁ§Æ® ÃÊ±âÈ­
+	K_ClearSensitive((KL_OBJECT_PTR)&encctx, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oKey, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oData, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oEncryptedData, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oDecryptedData, 2);
+
+	if (oEncryptedData[1].pValue != NULL)
+		free(oEncryptedData[1].pValue);
+	if (oDecryptedData[1].pValue != NULL)
+		free(oDecryptedData[1].pValue);
+
+}
+
+void T_Block_Enc_Dec_MultiPart(int op_mode, int keylen)
+{
+	};
+
+	//For Encryption/Decryption
+	KL_BYTE iv[16] = { 0xba,0x8c,0x2b,0x53,0xf2,0x9b,0x7f,0xd6,0xd3,0x37,0x7f,0xba,0x29,0x12,0x21,0x7d }; //Maximum IV Len : 16. Note : This buf size can be 16 or 8 according to the block cipher. 
+	KL_CONTEXT encctx = {
+		{ op_mode, NULL, 0, FALSE, FALSE },
+		{ KLA_BLOCK_IV, iv, 0, FALSE, FALSE },
+	};
+
+	//For 2 Plaintexts(as an example)
+	KL_BYTE DataBuf1[16] = { 0x00, };
+	KL_OBJECT oData1 = {
+		{ KLO_DATA,	NULL,	 0, FALSE, FALSE },
+		{ KLA_VALUE, DataBuf1, sizeof(DataBuf1), FALSE, FALSE }
+	};
+	KL_BYTE DataBuf2[16] = { 0x00, };
+	KL_OBJECT oData2 = {
+		{ KLO_DATA,	NULL,	 0, FALSE, FALSE },
+		{ KLA_VALUE, DataBuf2, sizeof(DataBuf2), FALSE, FALSE }
+	};
+
+	//The Encryption Output of The First chunk
+	KL_BYTE_PTR EncDataBuf1 = NULL;
+	KL_OBJECT oEncryptedData1 = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, EncDataBuf1, 0, FALSE, FALSE }
+	};
+	//The Encryption Output of The Second chunk
+	KL_BYTE_PTR EncDataBuf2 = NULL;
+	KL_OBJECT oEncryptedData2 = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, EncDataBuf2, 0, FALSE, FALSE }
+	};
+	//The Encryption Output of The Final
+	KL_BYTE_PTR EncDataBufF = NULL;
+	KL_OBJECT oEncryptedDataF = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, EncDataBufF, 0, FALSE, FALSE }
+	};
+
+	//For Encryption Output
+	KL_BYTE_PTR EncTotDataBuf = NULL;
+	KL_OBJECT oEncryptedTotData = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, EncTotDataBuf, 0, FALSE, FALSE }
+	};
+
+	//For Decryption Output of The First chunk
+	KL_BYTE_PTR DecDataBuf1 = NULL;
+	KL_OBJECT oDecryptedData1 = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, DecDataBuf1, 0, FALSE, FALSE }
+	};
+	//For Decryption Output of The Second chunk
+	KL_BYTE_PTR DecDataBuf2 = NULL;
+	KL_OBJECT oDecryptedData2 = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, DecDataBuf2, 0, FALSE, FALSE }
+	};
+	//For Decryption Output of The Final
+	KL_BYTE_PTR DecDataBufF = NULL;
+	KL_OBJECT oDecryptedDataF = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, DecDataBufF, 0, FALSE, FALSE }
+	};
+
+	//For Decryption Output
+	KL_BYTE_PTR DecTotDataBuf = NULL;
+	KL_OBJECT oDecryptedTotData = {
+		{ KLO_DATA,	NULL, 0, FALSE, FALSE },
+		{ KLA_VALUE, DecTotDataBuf, 0, FALSE, FALSE }
+	};
+
+	KL_RV ret;
+
+	//Step1 - ÆÄ¶ó¹ÌÅÍ ¼¼ÆÃ
+	switch (op_mode) {
+
+			/*ARIA*/
+		case KLO_CTX_ARIA_CBC:
+		case KLO_CTX_ARIA_CBC_PAD:
+		case KLO_CTX_ARIA_OFB:
+		case KLO_CTX_ARIA_CFB:
+		case KLO_CTX_ARIA_CTR:
+		case KLO_CTX_ARIA_CTR_PAD:
+			encctx[1].type = KLA_BLOCK_IV;
+			encctx[1].ulValueLen = KL_ARIA_BLOCK_BYTE_LEN;	//IV  Len : must be the same as the block size
+		case KLO_CTX_ARIA_ECB:									//Note : ECB does note require IV
+		case KLO_CTX_ARIA_ECB_PAD:
+			oKey[1].ulValueLen = keylen;					//Key Len : This chooses one of versions(ARIA128, ARIA192, ARIA256)
+
+			break;
+	
+	//Step 3(¾ÏÈ£È­) - ¾ÏÈ£È­
+	////ÃÊ±âÈ­(Key-Scheule µ¿ÀÛ)
+	if ((ret = K_EncryptInit(&encctx, (KL_OBJECT_PTR)&oKey)) != KLR_OK)
+	{
+		printf("K_EncryptInit failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+
+	////Ã¹¹øÂ° Chunk - K_EncryptUpdate()
+	////(Optional) ¾ÏÈ£È­ Ãâ·Â Å©±â¸¦ ¹ÝÈ¯(oEncryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oEncryptedData1[1].pValue = NULL;
+	if ((ret = K_EncryptUpdate(&encctx, (KL_OBJECT_PTR)&oData1,
+		(KL_OBJECT_PTR)&oEncryptedData1)) != KLR_OK)
+	{
+		printf("K_EncryptUpdate(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oEncryptedData1[1].pValue = (KL_BYTE_PTR)malloc(oEncryptedData1[1].ulValueLen);
+	////¾ÏÈ£È­ ¼öÇà
+	if ((ret = K_EncryptUpdate(&encctx, (KL_OBJECT_PTR)&oData1,
+		(KL_OBJECT_PTR)&oEncryptedData1)) != KLR_OK)
+	{
+		printf("K_EncryptUpdate failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oEncryptedData1[1].pValue, oEncryptedData1[1].ulValueLen, "encrypted chunk1");
+
+	oEncryptedTotData[1].pValue = (KL_BYTE_PTR)malloc(oEncryptedData1[1].ulValueLen);
+	memcpy(oEncryptedTotData[1].pValue, oEncryptedData1[1].pValue, oEncryptedData1[1].ulValueLen);
+	oEncryptedTotData[1].ulValueLen = oEncryptedData1[1].ulValueLen;
+	
+	////µÎ¹øÂ° Chunk - K_EncryptUpdate()
+	////(Optional) ¾ÏÈ£È­ Ãâ·Â Å©±â¸¦ ¹ÝÈ¯(oEncryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oEncryptedData2[1].pValue = NULL;
+	if ((ret = K_EncryptUpdate(&encctx, (KL_OBJECT_PTR)&oData2,
+		(KL_OBJECT_PTR)&oEncryptedData2)) != KLR_OK)
+	{
+		printf("K_EncryptUpdate(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oEncryptedData2[1].pValue = (KL_BYTE_PTR)malloc(oEncryptedData2[1].ulValueLen);
+	////¾ÏÈ£È­ ¼öÇà
+	if ((ret = K_EncryptUpdate(&encctx, (KL_OBJECT_PTR)&oData1,
+		(KL_OBJECT_PTR)&oEncryptedData2)) != KLR_OK)
+	{
+		printf("K_EncryptUpdate failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oEncryptedData2[1].pValue, oEncryptedData2[1].ulValueLen, "encrypted chunk2");
+
+	oEncryptedTotData[1].pValue = (KL_BYTE_PTR)realloc(oEncryptedTotData[1].pValue, oEncryptedTotData[1].ulValueLen + oEncryptedData2[1].ulValueLen);
+	memcpy(((KL_BYTE_PTR)oEncryptedTotData[1].pValue) + oEncryptedTotData[1].ulValueLen, oEncryptedData2[1].pValue, oEncryptedData2[1].ulValueLen);
+	oEncryptedTotData[1].ulValueLen += oEncryptedData2[1].ulValueLen;
+
+	////¸¶¹«¸® - K_EncryptUpdate()
+	////(Optional) ¾ÏÈ£È­ Ãâ·Â Å©±â¸¦ ¹ÝÈ¯(oEncryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oEncryptedDataF[1].pValue = NULL;
+	if ((ret = K_EncryptFinal(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedDataF)) != KLR_OK)
+	{
+		printf("K_EncryptFinal(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oEncryptedDataF[1].pValue = (KL_BYTE_PTR)malloc(oEncryptedDataF[1].ulValueLen);
+	////¸¶¹«¸® ¼öÇà
+	if ((ret = K_EncryptFinal(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedDataF)) != KLR_OK)
+	{
+		printf("K_EncryptFinal failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oEncryptedDataF[1].pValue, oEncryptedDataF[1].ulValueLen, "final");
+	
+	oEncryptedTotData[1].pValue = (KL_BYTE_PTR)realloc(oEncryptedTotData[1].pValue, oEncryptedTotData[1].ulValueLen + oEncryptedDataF[1].ulValueLen);
+	memcpy(((KL_BYTE_PTR)oEncryptedTotData[1].pValue) + oEncryptedTotData[1].ulValueLen, oEncryptedDataF[1].pValue, oEncryptedDataF[1].ulValueLen);
+	oEncryptedTotData[1].ulValueLen += oEncryptedDataF[1].ulValueLen;
+	////stdout
+	K_HexDump(oEncryptedTotData[1].pValue, oEncryptedTotData[1].ulValueLen, "encrypted data");
+
+	//Step 3(º¹È£È­) - º¹È£È­ (À§ÀÇ ¾ÏÈ£È­°ªÀ» ÀÔ·ÂÀ¸·Î ÇÔ)
+	////ÃÊ±âÈ­
+	if ((ret = K_DecryptInit(&encctx,
+		(KL_OBJECT_PTR)&oKey)) != KLR_OK)
+	{
+		printf("K_DecryptInit failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+
+	////Ã¹¹øÂ° Chunk - K_EncryptUpdate()
+	////(Optional) º¹È£È­ Ãâ·Â ±æÀÌ¸¦ ¹ÝÈ¯(oDecryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oDecryptedData1[1].pValue = NULL;
+	if ((ret = K_DecryptUpdate(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData1,
+		(KL_OBJECT_PTR)&oDecryptedData1)) != KLR_OK)
+	{
+		printf("K_DecryptUpdate(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oDecryptedData1[1].pValue = (KL_BYTE_PTR)malloc(oDecryptedData1[1].ulValueLen);
+	////º¹È£È­ ¼öÇà
+	if ((ret = K_DecryptUpdate(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData1,
+		(KL_OBJECT_PTR)&oDecryptedData1)) != KLR_OK)
+	{
+		printf("K_DecryptUpdate failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oDecryptedData1[1].pValue, oDecryptedData1[1].ulValueLen, "decrypted chunck1");
+
+	oDecryptedTotData[1].pValue = (KL_BYTE_PTR)malloc(oDecryptedData1[1].ulValueLen);
+	memcpy(oDecryptedTotData[1].pValue, oDecryptedData1[1].pValue, oDecryptedData1[1].ulValueLen);
+	oDecryptedTotData[1].ulValueLen = oDecryptedData1[1].ulValueLen;
+
+
+	////µÎ¹øÂ° Chunk - K_EncryptUpdate()
+	////(Optional) º¹È£È­ Ãâ·Â ±æÀÌ¸¦ ¹ÝÈ¯(oDecryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oDecryptedData2[1].pValue = NULL;
+	if ((ret = K_DecryptUpdate(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData2,
+		(KL_OBJECT_PTR)&oDecryptedData2)) != KLR_OK)
+	{
+		printf("K_DecryptUpdate(Obtaining Output Length) failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	oDecryptedData2[1].pValue = (KL_BYTE_PTR)malloc(oDecryptedData2[1].ulValueLen);
+	////º¹È£È­ ¼öÇà
+	if ((ret = K_DecryptUpdate(&encctx,
+		(KL_OBJECT_PTR)&oEncryptedData2,
+		(KL_OBJECT_PTR)&oDecryptedData2)) != KLR_OK)
+	{
+		printf("K_DecryptUpdate failed: %s\n", K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oDecryptedData2[1].pValue, oDecryptedData2[1].ulValueLen, "decrypted chunck2");
+
+	oDecryptedTotData[1].pValue = (KL_BYTE_PTR)realloc(oDecryptedTotData[1].pValue, oDecryptedTotData[1].ulValueLen + oDecryptedData2[1].ulValueLen);
+	memcpy(((KL_BYTE_PTR)oDecryptedTotData[1].pValue) + oDecryptedTotData[1].ulValueLen, oDecryptedData2[1].pValue, oDecryptedData2[1].ulValueLen);
+	oDecryptedTotData[1].ulValueLen += oDecryptedData2[1].ulValueLen;
+
+
+	////¸¶¹«¸® - K_DecryptFinal()
+	////(Optional) º¹È£È­ Ãâ·Â Å©±â¸¦ ¹ÝÈ¯(oEncryptedData[1].ulValueLen) : ÇØ´ç Sub-StepÀº »ç¿ëÀÚ°¡ Ãâ·Â BufferÀÇ Å©±â¸¦ ¾Ë°íÀÚ ÇÒ¶§ ¼öÇàÇÑ´Ù.
+	oDecryptedDataF[1].pValue = NULL;
+	if( (ret = K_DecryptFinal(&encctx,
+		(KL_OBJECT_PTR)&oDecryptedDataF)) != KLR_OK )
+	{
+		printf("K_DecryptFinal(Obtaining Output Length) failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+	oDecryptedDataF[1].pValue = (KL_BYTE_PTR)malloc(oDecryptedDataF[1].ulValueLen);
+	////¸¶¹«¸® ¼öÇà
+	if( (ret = K_DecryptFinal(&encctx,
+		(KL_OBJECT_PTR)&oDecryptedDataF)) != KLR_OK )
+	{
+		printf("K_DecryptFinal failed: %s\n",K_GetErrorMsg(ret));
+		goto err;
+	}
+	////stdout
+	K_HexDump(oDecryptedDataF[1].pValue, oDecryptedDataF[1].ulValueLen, "final");
+
+	oDecryptedTotData[1].pValue = (KL_BYTE_PTR)realloc(oDecryptedTotData[1].pValue, oDecryptedTotData[1].ulValueLen + oDecryptedDataF[1].ulValueLen);
+	memcpy(((KL_BYTE_PTR)oDecryptedTotData[1].pValue) + oDecryptedTotData[1].ulValueLen, oDecryptedDataF[1].pValue, oDecryptedDataF[1].ulValueLen);
+	oDecryptedTotData[1].ulValueLen += oDecryptedDataF[1].ulValueLen;
+
+	////stdout
+	K_HexDump(oDecryptedTotData[1].pValue, oDecryptedTotData[1].ulValueLen, "decrypted data");
+
+
+err:
+	K_ClearSensitive((KL_OBJECT_PTR)&encctx, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oKey, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oData1, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oData2, 2);
+
+	K_ClearSensitive((KL_OBJECT_PTR)&oEncryptedData1, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oEncryptedData2, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oEncryptedDataF, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oEncryptedTotData, 2);
+
+	K_ClearSensitive((KL_OBJECT_PTR)&oDecryptedData1, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oDecryptedData2, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oDecryptedDataF, 2);
+	K_ClearSensitive((KL_OBJECT_PTR)&oDecryptedTotData, 2);
+
+	if (oEncryptedData1[1].pValue != NULL)
+		free(oEncryptedData1[1].pValue);
+	if (oEncryptedData2[1].pValue != NULL)
+		free(oEncryptedData2[1].pValue);
+	if (oEncryptedDataF[1].pValue != NULL)
+		free(oEncryptedDataF[1].pValue);
+	if (oEncryptedTotData[1].pValue != NULL)
+		free(oEncryptedTotData[1].pValue);
+
+
+	if (oDecryptedData1[1].pValue != NULL)
+		free(oDecryptedData1[1].pValue);
+	if (oDecryptedData2[1].pValue != NULL)
+		free(oDecryptedData2[1].pValue);
+	if (oDecryptedDataF[1].pValue != NULL)
+		free(oDecryptedDataF[1].pValue);
+	if (oDecryptedTotData[1].pValue != NULL)
+		free(oDecryptedTotData[1].pValue);
+}
+
+// ARIA128/192/256
+void Menu_ARIA_Enc_Dec_SinglePart(void)
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-128)\n");  //CFB-128
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CFB, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-192)\n");  //CFB-128
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CFB, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-256)\n");  //CFB-128
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CFB, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-128)\n");
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CTR, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-192)\n");
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CTR, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-256)\n");
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_ARIA_CTR, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+}
+
+// SEED
+void Menu_SEED_Enc_Dec_SinglePart(void)
+{
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_SEED_CFB\n");  //CFB-128
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_SEED_CFB, KL_SEED_KEY_BYTE_LEN);
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_SEED_OFB\n");
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_SEED_OFB, KL_SEED_KEY_BYTE_LEN);
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_SEED_CTR\n");
+	T_Block_Enc_Dec_SinglePart(KLO_CTX_SEED_CTR, KL_SEED_KEY_BYTE_LEN);
+}
+
+
+// ARIA128/192/256
+void Menu_ARIA_Enc_Dec_MultiPart(void)
+{
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_ECB(ARIA-128)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_ECB, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_ECB(ARIA-192)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_ECB, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_ECB(ARIA-256)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_ECB, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CBC(ARIA-128)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CBC, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CBC(ARIA-192)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CBC, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CBC(ARIA-256)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CBC, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-128)\n");  //CFB-128
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CFB, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-192)\n");  //CFB-128
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CFB, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CFB(ARIA-256)\n");  //CFB-128
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CFB, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_OFB(ARIA-128)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_OFB, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_OFB(ARIA-192)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_OFB, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_OFB(ARIA-256)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_OFB, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-128)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CTR, KL_ARIA128_KEY_BYTE_LEN);
+#ifdef PRINT_ALL_KEYLEN
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-192)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CTR, KL_ARIA192_KEY_BYTE_LEN);
+	_HLINE("-", 74);
+	printf("KLO_CTX_ARIA_CTR(ARIA-256)\n");
+	T_Block_Enc_Dec_MultiPart(KLO_CTX_ARIA_CTR, KL_ARIA256_KEY_BYTE_LEN);
+#endif
+}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// implementation belongs here to be call in steps 1->4 below....
+#error "Insert customer implementation here and hook into template procedure calls belows"
+
+// ] end
+
+// Senetas custom symmetric cipher hooks here....
+
+// 1. define csdk_key_struct, leave ks,bs args but user may change priv data section below
+//    to suit the requirements/size of their cipher
+struct csdk_key_st {
+    int ks;		// key size in bits
+    int bs;		// cipher block size
+
+    // priv data here, initialised on set key operations, and utilised within the _csdk_encrypt operation.
+    KL_CONTEXT encctx = {
+		{op_mode, NULL, 0, FALSE, FALSE},
+		{ KLA_BLOCK_IV, iv, 0, FALSE, FALSE},
+	};
+};
+typedef struct csdk_key_st CSDK_KEY;
+
+// 2. define key init/expansion decrypt callback
+static inline __attribute__((always_inline))
+int _csdk_set_decrypt_key(const unsigned char *userKey, const int bits, const int bs, CSDK_KEY *key)
+{
+    key->ks = bits;
+    key->bs = bs;
+    KL_OBJECT oKey = { 
+		{KLO_SECRET_KEY, NULL, 0, FALSE, FALSE},
+		{KLA_VALUE, user_key, 0, TRUE, FALSE},
+	};
+
+    if( (ret = K_EncryptInit(&key->encctx,(KL_OBJECT_PTR)&oKey)) != KLR_OK )
+    {	
+printf("K_EncryptInit failed: %s\n",K_GetErrorMsg(ret));
+goto err;
+    }
+    (void) userKey;
+    // INSERT specific implementation key init for decryption here!
+    //custom_keygen((bits, userKey, key->priv);
+    return 0;
+}
+
+// 3. define key init/expansion encrypt callback
+static inline __attribute__((always_inline))
+int _csdk_set_encrypt_key(const unsigned char *userKey, const int bits, const int bs, CSDK_KEY *key)
+{
+    key->ks = bits;
+    key->bs = bs;
+
+    (void) userKey;
+    // INSERT specific implementation key init for encryption here!
+    //custom_keygen((bits, userKey, key->priv);
+    return 0;
+}
+
+// 4. define encrypt callback
+//
+static inline __attribute__((always_inline))
+void _csdk_encrypt(const unsigned char *in, unsigned char *out, const CSDK_KEY * key)
+{
+    (void) in;
+    (void) out;
+    (void) key;
+    // INSERT specific implementation for enrypt/decrypt here!
+    //custom_encrypt(key->ks, in, key->keyTable, out);
+}

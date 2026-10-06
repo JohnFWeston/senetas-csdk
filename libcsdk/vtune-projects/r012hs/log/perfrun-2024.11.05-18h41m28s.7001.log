@@ -1,0 +1,11 @@
+0 [139959808325440] INFO perfrun.launcher <> - Launcher main begin
+1 [139959808325440] INFO perfrun.launcher <> - MessageCatalogInit finished
+1 [139959808325440] INFO perfrun.launcher <> - Launcher instance created
+1 [139959808325440] INFO perfrun.launcher <> - argc = 9; cmdline = /opt/intel/oneapi/vtune/2024.3/bin64/amplxe-runss --ui-output-format xml --ui-output-fd 15 -r /home/csdk/csdk/libcsdk/vtune-projects/r012hs --command stop 
+20 [139959808325440] INFO perfrun.perfcollector <> - SEP tool path: /opt/intel/oneapi/vtune/2024.3/bin64/sep
+28 [139959808325440] INFO perfrun.launcher <> - create msngr2::ICliToolContext
+28 [139959808325440] INFO perfrun.launcher <> - create file finder object
+28 [139959808325440] INFO perfrun.launcher <> - open the result directory: pattern = /home/csdk/csdk/libcsdk/vtune-projects/r012hs
+29 [139959808325440] INFO perfrun.launcher <> - RpcClient: IP address = 127.0.0.1; port = 4294938901
+120 [139959808325440] INFO perfrun.launcher <> - Application exit code: 0
+120 [139959808325440] INFO perfrun.launcher <> - Exit code: 0

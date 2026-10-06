@@ -1,0 +1,12 @@
+# ninja log v6
+3	8	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/asm/ghash-x86_64.s.o	5837d54a048d4a6
+3	12	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/asm/cpuid.S.o	6efe735748d05a
+2	35	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/csdk_err.c.o	ec039fce4def65ad
+1	52	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/csdk.c.o	62a7566b92cb395a
+2	53	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/csdk_utils.c.o	a4e1b59a5d3dc2f2
+1	67	1791328459737981800	src/csdk/CMakeFiles/csdk.dir/csdk_ciphers.c.o	b71e418e8ff36c16
+3	91	1791328459737981800	tests/CMakeFiles/csdk_test.dir/csdk_test.c.o	496183bfbf943119
+67	94	1791328459801981531	lib/libcsdk.so.0.0.4	d58b15ba8921617
+94	102	1791328459829981413	lib/libcsdk.so.0	79b857714809c6f2
+94	102	1791328459829981413	lib/libcsdk.so	79b857714809c6f2
+91	120	1791328459825981431	tests/csdk_test	9a7b078731d5a1b2

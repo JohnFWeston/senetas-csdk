@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+ <connectionOption type="string">localhost</connectionOption>
+ <rdmgr>
+  <timestamp type="u64_t">1728258045</timestamp>
+  <hostname type="string">csdk-mike</hostname>
+  <os type="string">linux</os>
+  <product type="string">Intel® VTune™ Profiler 2024.3.0</product>
+  <buildNumber type="s32_t">628755</buildNumber>
+  <logicalCPUCount type="s32_t">4</logicalCPUCount>
+  <physicalCoreCount type="s32_t">4</physicalCoreCount>
+  <processorPackageCount type="s32_t">1</processorPackageCount>
+  <CPUFrequency type="s64_t">2610080000</CPUFrequency>
+  <CPUFamily type="s32_t">6</CPUFamily>
+  <CPUModel type="s32_t">154</CPUModel>
+  <CPUStepping type="s32_t">3</CPUStepping>
+  <CPUBrandName type="string">12th Gen Intel(R) Core(TM) i7-12700H</CPUBrandName>
+  <isa type="string">avx2</isa>
+ </rdmgr>
+ <vs_search_dirs>
+  <searchDirs>
+   <searchCategory>
+    <category type="u8_t">1</category>
+    <searchDirectory>
+     <name type="string">./packages</name>
+     <recursive type="bool">true</recursive>
+     <priority type="bool">true</priority>
+    </searchDirectory>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">2</category>
+    <searchDirectory>
+     <name type="string">./packages</name>
+     <recursive type="bool">true</recursive>
+     <priority type="bool">true</priority>
+    </searchDirectory>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">3</category>
+    <searchDirectory>
+     <name type="string">packages,tests,src/csdk,src/csdk/cipher</name>
+     <recursive type="bool">true</recursive>
+     <priority type="bool">true</priority>
+    </searchDirectory>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">4</category>
+   </searchCategory>
+  </searchDirs>
+ </vs_search_dirs>
+ <All_Configurations-All_Platforms>
+  <searchDirs>
+   <searchCategory>
+    <category type="u8_t">1</category>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">2</category>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">3</category>
+   </searchCategory>
+   <searchCategory>
+    <category type="u8_t">4</category>
+   </searchCategory>
+  </searchDirs>
+  <target_settings>
+   <selected_workload>
+    <localhost type="string">launch</localhost>
+   </selected_workload>
+   <workloads>
+    <localhost>
+     <launch type="pointer" type_id="dasID_cctrl2::ApplicationWorkload" ptr_type="dasID_cctrl2::IWorkload">
+      <workload>
+       <targetName type="string">launch</targetName>
+       <use_app_dir_as_work_dir type="bool">true</use_app_dir_as_work_dir>
+       <launch_app.environment type="string">BASE_DIR=/home/csdk/csdk/
+LD_LIBRARY_PATH=/home/csdk/csdk/openssl-1.1.1n/
+OPENSSL_ENGINES=/home/csdk/csdk/libcsdk/build/lib</launch_app.environment>
+       <launch_app.app_to_launch type="string">/home/csdk/csdk/libcsdk/../openssl-1.1.1n/apps/openssl</launch_app.app_to_launch>
+       <result_directory.path type="string">/home/csdk/csdk/libcsdk/vtune-projects/r@@@{at}</result_directory.path>
+       <launch_app.app_parameters type="string">speed -evp aes-256-gcm -bytes 1024 -seconds 10 -mr -engine libcsdk</launch_app.app_parameters>
+       <launch_app.working_folder type="string">/home/csdk/csdk/libcsdk/../openssl-1.1.1n/apps</launch_app.working_folder>
+       <context>
+        <contextValue>
+         <id type="string">allowMultipleRuns</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">analyzeKvmGuest</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">analyzeSystemWide</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">cpuMask</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">customCollector</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">dataLimit</id>
+         <value type="s32_t">1000</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">enableRing</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">finalizationMode</id>
+         <value type="string">fast</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">followChild</id>
+         <value type="bool">true</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">followChildGroup</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">followChildStrategy</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">groupForFinalizationControl</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">kvmGuestKallsyms</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">kvmGuestModules</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">kvmProfileGuest</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">mrteMode</id>
+         <value type="string">auto</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">targetDurationType</id>
+         <value type="string">short</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">targetRingBuffer</id>
+         <value type="double">0</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">targetType</id>
+         <value type="string">launch</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">traceMpi</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id type="string">tracingMode</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">wrapperScriptContent</id>
+         <value type="string"></value>
+        </contextValue>
+        <contextValue>
+         <id type="string">wrapperScriptPath</id>
+         <value type="string"></value>
+        </contextValue>
+       </context>
+      </workload>
+     </launch>
+    </localhost>
+   </workloads>
+  </target_settings>
+  <analysis_type_settings>
+   <selected_analysis_type_path type="string">/opt/intel/oneapi/vtune/2024.3/config/analysis_type/hotspots.cfg</selected_analysis_type_path>
+   <localhost>
+    <launch>
+     <at_start_point>
+      <at_path type="string">/opt/intel/oneapi/vtune/2024.3/config/analysis_type/survey.cfg</at_path>
+      <knob_values>
+       <contextValue>
+        <id type="string">allowedViewpoints</id>
+        <value type="string">%PerfSnapshotViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectMemoryBW</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectPCIeBW</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">dramBandwidthLimitsAT</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">gpuAdapterTileNames</id>
+        <value type="string"></value>
+       </contextValue>
+       <contextValue>
+        <id type="string">initialViewpoint</id>
+        <value type="string">%PerfSnapshotViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">isUArchUsageAvailable</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">targetGPUAtk</id>
+        <value type="string"></value>
+       </contextValue>
+       <contextValue>
+        <id type="string">targetGPUGroup</id>
+        <value type="null"></value>
+       </contextValue>
+       <contextValue>
+        <id type="string">useGpuCountingMode</id>
+        <value type="bool">true</value>
+       </contextValue>
+      </knob_values>
+     </at_start_point>
+     <at_start_point>
+      <at_path type="string">/opt/intel/oneapi/vtune/2024.3/config/analysis_type/hotspots.cfg</at_path>
+      <knob_values>
+       <contextValue>
+        <id type="string">allowedViewpoints</id>
+        <value type="string">%HotspotsByCPUUsageViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">enableCharacterizationInsights</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">enableStackCollect</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">goodFastFrameThreshold</id>
+        <value type="double">100</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">groupForCustomControl</id>
+        <value type="null"></value>
+       </contextValue>
+       <contextValue>
+        <id type="string">initialViewpoint</id>
+        <value type="string">%HotspotsByCPUUsageViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">samplingInterval</id>
+        <value type="double">1</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">samplingMode</id>
+        <value type="string">sw</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">slowGoodFrameThreshold</id>
+        <value type="double">40</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">stackSizeCollect</id>
+        <value type="string">0</value>
+       </contextValue>
+      </knob_values>
+     </at_start_point>
+     <at_start_point>
+      <at_path type="string">/opt/intel/oneapi/vtune/2024.3/config/analysis_type/microarchitecture_exploration.cfg</at_path>
+      <knob_values>
+       <contextValue>
+        <id type="string">allowedViewpoints</id>
+        <value type="string">%SNBGeneralExplorationViewpointName,%SNBBandwidthViewpointName,%PMUEventsViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectBadSpeculation</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectCoreBound</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectFrontendBound</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectMemoryBW</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectMemoryBound</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">collectRetiring</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">dramBandwidthLimitsAT</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">enableStackCollect</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">groupForSelectMetrics</id>
+        <value type="null"></value>
+       </contextValue>
+       <contextValue>
+        <id type="string">initialViewpoint</id>
+        <value type="string">%SNBGeneralExplorationViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">pmuSamplingCountSwitch</id>
+        <value type="string">detailed</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">samplingInterval</id>
+        <value type="double">1</value>
+       </contextValue>
+      </knob_values>
+     </at_start_point>
+     <at_start_point>
+      <at_path type="string">/opt/intel/oneapi/vtune/2024.3/config/analysis_type/memory_access.cfg</at_path>
+      <knob_values>
+       <contextValue>
+        <id type="string">allowedViewpoints</id>
+        <value type="string">%SNBBandwidthViewpointName,%SNBGeneralExplorationViewpointName,%HotspotsByCPUUsageViewpointName,%PMUEventsViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">analyzeCAT</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">analyzeCacheOccupancy</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">analyzeL3ExternalBW</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">analyzeMemoryObjects</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">analyzeOpenMPRegions</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">dramBandwidthLimitsAT</id>
+        <value type="bool">true</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">enableMemoryObjectGrouper</id>
+        <value type="bool">false</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">initialViewpoint</id>
+        <value type="string">%SNBBandwidthViewpointName</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">memoryObjectMinSize</id>
+        <value type="s32_t">1024</value>
+       </contextValue>
+       <contextValue>
+        <id type="string">samplingInterval</id>
+        <value type="double">1</value>
+       </contextValue>
+      </knob_values>
+     </at_start_point>
+    </launch>
+   </localhost>
+  </analysis_type_settings>
+ </All_Configurations-All_Platforms>
+ <contextValues type="bag"/>
+</root>

@@ -1,0 +1,174 @@
+// This example is a simple XOR/key operation, and a trivial example of the symmetric API into the csdk engine.
+#include <emmintrin.h>
+
+// 1. define csdk_key_struct, leave ks,bs args but user may change priv 
+// data section below to suit the requirements/size of their cipher
+typedef struct __attribute__((packed, aligned(16))) csdk_key_st {
+    int ks;		// key size in bits
+    int bs;		// cipher block size
+    unsigned char dummy[8]; // pad so key is aligned
+    // insert any priv data here, initialised on set key operations,
+    // and utilised within the _csdk_encrypt operation.
+    unsigned char key[32];
+} CSDK_KEY;
+
+// best effort to shadows the exact opaque struct in openssl in order
+// to leverage gcm internals - no changes need
+// [
+typedef struct {
+    unsigned long  hi, lo;
+} u128;
+
+typedef struct gcm128_context_s {
+    /* Following 6 names follow names in GCM specification */
+    union {
+        unsigned long u[2];
+        unsigned int d[4];
+        unsigned char c[16];
+        size_t t[16 / sizeof(size_t)];
+    } Yi, EKi, EK0, len, Xi, H;
+    /*
+     * Relative position of Xi, H and pre-computed Htable is used in some
+     * assembler modules, i.e. don't change the order!
+     */
+    u128 Htable[16];
+    void (*gmult) (unsigned long  Xi[2], const u128 Htable[16]);
+    void (*ghash) (unsigned long  Xi[2], const u128 Htable[16], const unsigned char *inp,
+                   size_t len);
+    unsigned int mres, ares;
+    block128_f block;
+    void *key;
+    unsigned char Xn[48];
+} gcm128_context_t;
+
+typedef struct __attribute__((packed, aligned(16))) csdk_gcm_st_s {
+    union {
+        double align;
+        CSDK_KEY ks;
+    } ks;
+    int key_set;                /* Set if key initialised */
+    int iv_set;                 /* Set if an iv is set */
+    gcm128_context_t gcm;
+    unsigned char *iv;          /* Temporary IV store */
+    int ivlen;                  /* IV length */
+    int taglen;
+    int iv_gen;                 /* It is OK to generate IVs */
+    ctr128_f ctr;
+} csdk_gcm_st_t;
+typedef struct csdk_gcm_st_s CSDK_GCM_CTX;
+// ]
+
+// 2. define key init/expansion decrypt callback
+//static inline __attribute__((always_inline))
+int _csdk_set_decrypt_key(const unsigned char *userKey, const unsigned char * iv,
+	       			EVP_CIPHER_CTX * ctx)
+{
+    (void) iv;
+
+    switch (EVP_CIPHER_CTX_nid(ctx)) {
+    case NID_aes_128_cfb128:
+    case NID_aes_256_cfb128:
+    case NID_aes_128_ctr:
+    case NID_aes_256_ctr:
+	{
+    	CSDK_KEY * key = EVP_CIPHER_CTX_get_cipher_data(ctx);
+   	key->ks = EVP_CIPHER_CTX_key_length(ctx) * 8; // in bits;
+    	key->bs = 16;
+    	// INSERT specific implementation key init for decryption here!
+    	// For XOR operation, we trivially just use the key directly
+    	memcpy(key->key, userKey, EVP_CIPHER_CTX_key_length(ctx));
+	}
+        break;
+    case NID_aes_128_gcm:
+    case NID_aes_256_gcm:
+	{
+    	CSDK_GCM_CTX * gctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+    	CSDK_KEY * key = &gctx->ks.ks;
+   	key->ks = EVP_CIPHER_CTX_key_length(ctx) * 8; // in bits;
+    	key->bs = 16;
+    	// INSERT specific implementation key init for decryption here!
+    	// For XOR operation, we trivially just use the key directly
+    	memcpy(key->key, userKey, EVP_CIPHER_CTX_key_length(ctx));
+	}
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+// 3. define key init/expansion encrypt callback
+//static inline __attribute__((always_inline))
+int _csdk_set_encrypt_key(const unsigned char *userKey, const unsigned char * iv, EVP_CIPHER_CTX * ctx)
+{
+    (void) iv;
+
+    switch (EVP_CIPHER_CTX_nid(ctx)) {
+    case NID_aes_128_cfb128:
+    case NID_aes_256_cfb128:
+    case NID_aes_128_ctr:
+    case NID_aes_256_ctr:
+	{
+    	CSDK_KEY * key = EVP_CIPHER_CTX_get_cipher_data(ctx);
+   	key->ks = EVP_CIPHER_CTX_key_length(ctx) * 8; // in bits;
+    	key->bs = 16;
+    	// INSERT specific implementation key init for encryption here!
+    	// For XOR operation, we trivially just use the key directly
+    	memcpy(key->key, userKey, EVP_CIPHER_CTX_key_length(ctx));
+	}
+        break;
+    case NID_aes_128_gcm:
+    case NID_aes_256_gcm:
+	{
+    	CSDK_GCM_CTX * gctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+    	CSDK_KEY * key = &gctx->ks.ks;
+   	key->ks = EVP_CIPHER_CTX_key_length(ctx) * 8; // in bits;
+    	key->bs = 16;
+    	// INSERT specific implementation key init for encryption here!
+    	// For XOR operation, we trivially just use the key directly
+    	memcpy(key->key, userKey, EVP_CIPHER_CTX_key_length(ctx));
+	}
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+// 4. define encrypt callback
+//
+//static inline __attribute__((always_inline))
+void _csdk_encrypt(const unsigned char *in, unsigned char *out, const CSDK_KEY * key)
+{
+#if 0
+    // For XOR operation, just XOR data with key, twice if aes256 (32 byte) key
+    __m128i t = _mm_loadu_si128((__m128i*) in);
+    __m128i k = _mm_load_si128((__m128i*) key->key);
+    t = _mm_xor_si128(t, k);
+    if (key->ks/8 > key->bs)
+    {
+	k = _mm_load_si128((__m128i*) &key->key[key->bs]);
+	t = _mm_xor_si128(t, k);
+    }
+#else
+    // slight tweak to demonstrate changes to selftest etc
+    // For XOR operation, just XOR data with key, twice if aes256 (32 byte) key
+    __m128i t;
+    __m128i k;
+    if (key->ks/8 > key->bs)
+    {
+        t = _mm_loadu_si128((__m128i*) in);
+        k = _mm_load_si128((__m128i*) &key->key[key->bs]);
+        t = _mm_xor_si128(t, k);
+        k = _mm_load_si128((__m128i*) key->key);
+        t = _mm_xor_si128(t, k);
+    }
+    else
+    {
+        t = _mm_loadu_si128((__m128i*) in);
+        k = _mm_load_si128((__m128i*) key->key);
+        t = _mm_xor_si128(t, k);
+    }
+#endif
+    _mm_storeu_si128((__m128i*) out, t);
+}

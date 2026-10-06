@@ -1,0 +1,5 @@
+engine "libcsdk" set.
++DT:aes-256-gcm:1:1024
++R:144894:aes-256-gcm:1.050000
++H:1024
++F:22:aes-256-gcm:141306148.57

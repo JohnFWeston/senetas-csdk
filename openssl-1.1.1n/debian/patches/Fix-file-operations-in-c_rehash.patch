@@ -1,0 +1,216 @@
+From: Daniel Fiala <daniel@openssl.org>
+Date: Sun, 29 May 2022 20:11:24 +0200
+Subject: Fix file operations in c_rehash.
+
+CVE-2022-2068
+
+Reviewed-by: Matt Caswell <matt@openssl.org>
+Reviewed-by: Richard Levitte <levitte@openssl.org>
+
+[bigeasy: ported from the 3.0 branch with the compat patch]
+---
+ tools/c_rehash.in | 131 ++++++++++++++++++++++++------------------------------
+ 1 file changed, 59 insertions(+), 72 deletions(-)
+
+diff --git a/tools/c_rehash.in b/tools/c_rehash.in
+index 914be03da14f..a8511ac816d8 100644
+--- a/tools/c_rehash.in
++++ b/tools/c_rehash.in
+@@ -1,7 +1,7 @@
+ #!{- $config{HASHBANGPERL} -}
+ 
+ # {- join("\n# ", @autowarntext) -}
+-# Copyright 1999-2021 The OpenSSL Project Authors. All Rights Reserved.
++# Copyright 1999-2022 The OpenSSL Project Authors. All Rights Reserved.
+ #
+ # Licensed under the OpenSSL license (the "License").  You may not use
+ # this file except in compliance with the License.  You can obtain a copy
+@@ -99,18 +99,41 @@ foreach (@dirlist) {
+ }
+ exit($errorcount);
+ 
++sub copy_file {
++    my ($src_fname, $dst_fname) = @_;
++
++    if (open(my $in, "<", $src_fname)) {
++        if (open(my $out, ">", $dst_fname)) {
++            print $out $_ while (<$in>);
++            close $out;
++        } else {
++            warn "Cannot open $dst_fname for write, $!";
++        }
++        close $in;
++    } else {
++        warn "Cannot open $src_fname for read, $!";
++    }
++}
++
+ sub hash_dir {
++    my $dir = shift;
+ 	my %hashlist;
+-	print "Doing $_[0]\n";
+-	chdir $_[0];
+-	opendir(DIR, ".");
++
++	print "Doing $dir\n";
++
++	if (!chdir $dir) {
++		print STDERR "WARNING: Cannot chdir to '$dir', $!\n";
++		return;
++	}
++
++	opendir(DIR, ".") || print STDERR "WARNING: Cannot opendir '.', $!\n";
+ 	my @flist = sort readdir(DIR);
+ 	closedir DIR;
+ 	if ( $removelinks ) {
+ 		# Delete any existing symbolic links
+ 		foreach (grep {/^[\da-f]+\.r{0,1}\d+$/} @flist) {
+ 			if (-l $_) {
+-				print "unlink $_" if $verbose;
++				print "unlink $_\n" if $verbose;
+ 				unlink $_ || warn "Can't unlink $_, $!\n";
+ 			}
+ 		}
+@@ -123,17 +146,18 @@ sub hash_dir {
+ 			next;
+ 		}
+ 		link_hash_cert($fname) if ($cert);
+-		link_hash_cert_old($fname) if ($cert);
+ 		link_hash_crl($fname) if ($crl);
+-		link_hash_crl_old($fname) if ($crl);
+ 	}
++
++	chdir $pwd;
+ }
+ 
+ sub check_file {
+ 	my ($is_cert, $is_crl) = (0,0);
+ 	my $fname = $_[0];
+-	open IN, $fname;
+-	while(<IN>) {
++
++	open(my $in, "<", $fname);
++	while(<$in>) {
+ 		if (/^-----BEGIN (.*)-----/) {
+ 			my $hdr = $1;
+ 			if ($hdr =~ /^(X509 |TRUSTED |)CERTIFICATE$/) {
+@@ -145,7 +169,7 @@ sub check_file {
+ 			}
+ 		}
+ 	}
+-	close IN;
++	close $in;
+ 	return ($is_cert, $is_crl);
+ }
+ 
+@@ -174,9 +198,24 @@ sub compute_hash {
+ # certificate fingerprints
+ 
+ sub link_hash_cert {
+-		my $fname = $_[0];
+-		my $x509hash = $_[1] || '-subject_hash';
+-		my ($hash, $fprint) = compute_hash($openssl, "x509", $x509hash,
++	link_hash($_[0], 'cert', '-subject_hash');
++	link_hash($_[0], 'cert', '-subject_hash_old');
++}
++
++# Same as above except for a CRL. CRL links are of the form <hash>.r<n>
++
++sub link_hash_crl {
++    link_hash($_[0], 'crl', '-hash');
++    link_hash($_[0], 'crl', '-hash_old');
++}
++
++sub link_hash {
++    my ($fname, $type, $hash_name) = @_;
++    my $is_cert = $type eq 'cert' or $type eq 'cert_old';
++
++    my ($hash, $fprint) = compute_hash($openssl,
++                                       $is_cert ? "x509" : "crl",
++                                       $hash_name,
+ 						   "-fingerprint", "-noout",
+ 						   "-in", $fname);
+ 		chomp $hash;
+@@ -186,75 +225,23 @@ sub link_hash_cert {
+ 		$fprint =~ tr/://d;
+ 		my $suffix = 0;
+ 		# Search for an unused hash filename
+-		while(exists $hashlist{"$hash.$suffix"}) {
++    my $crlmark = $is_cert ? "" : "r";
++    while(exists $hashlist{"$hash.$crlmark$suffix"}) {
+ 			# Hash matches: if fingerprint matches its a duplicate cert
+-			if ($hashlist{"$hash.$suffix"} eq $fprint) {
+-				print STDERR "WARNING: Skipping duplicate certificate $fname\n";
++        if ($hashlist{"$hash.$crlmark$suffix"} eq $fprint) {
++            my $what = $is_cert ? 'certificate' : 'CRL';
++            print STDERR "WARNING: Skipping duplicate $what $fname\n";
+ 				return;
+ 			}
+ 			$suffix++;
+ 		}
+-		$hash .= ".$suffix";
++    $hash .= ".$crlmark$suffix";
+ 		if ($symlink_exists) {
+ 			print "link $fname -> $hash\n" if $verbose;
+ 			symlink $fname, $hash || warn "Can't symlink, $!";
+ 		} else {
+ 			print "copy $fname -> $hash\n" if $verbose;
+-                        if (open($in, "<", $fname)) {
+-                            if (open($out,">", $hash)) {
+-                                print $out $_ while (<$in>);
+-                                close $out;
+-                            } else {
+-                                warn "can't open $hash for write, $!";
+-                            }
+-                            close $in;
+-                        } else {
+-                            warn "can't open $fname for read, $!";
+-                        }
+-		}
+-		$hashlist{$hash} = $fprint;
+-}
+-
+-sub link_hash_cert_old {
+-		link_hash_cert($_[0], '-subject_hash_old');
+-}
+-
+-sub link_hash_crl_old {
+-		link_hash_crl($_[0], '-hash_old');
+-}
+-
+-
+-# Same as above except for a CRL. CRL links are of the form <hash>.r<n>
+-
+-sub link_hash_crl {
+-		my $fname = $_[0];
+-		my $crlhash = $_[1] || "-hash";
+-		my ($hash, $fprint) = compute_hash($openssl, "crl", $crlhash,
+-						   "-fingerprint", "-noout",
+-						   "-in", $fname);
+-		chomp $hash;
+-		chomp $fprint;
+-		return if !$hash;
+-		$fprint =~ s/^.*=//;
+-		$fprint =~ tr/://d;
+-		my $suffix = 0;
+-		# Search for an unused hash filename
+-		while(exists $hashlist{"$hash.r$suffix"}) {
+-			# Hash matches: if fingerprint matches its a duplicate cert
+-			if ($hashlist{"$hash.r$suffix"} eq $fprint) {
+-				print STDERR "WARNING: Skipping duplicate CRL $fname\n";
+-				return;
+-			}
+-			$suffix++;
+-		}
+-		$hash .= ".r$suffix";
+-		if ($symlink_exists) {
+-			print "link $fname -> $hash\n" if $verbose;
+-			symlink $fname, $hash || warn "Can't symlink, $!";
+-		} else {
+-			print "cp $fname -> $hash\n" if $verbose;
+-			system ("cp", $fname, $hash);
+-                        warn "Can't copy, $!" if ($? >> 8) != 0;
++        copy_file($fname, $hash);
+ 		}
+ 		$hashlist{$hash} = $fprint;
+ }

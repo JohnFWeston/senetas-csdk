@@ -1,0 +1,7 @@
+CSDK version 0.0.4
+... Model: aes (1.4)
+...  Arch: corei7
+...  Ossl: OpenSSL 1.1.1n  15 Mar 2022
+... Built: 20261007-101419
+           adc2fc181442e2a2725f345fa22580a13d55082d7b26ee5ce0fca6a0fd7528d8  ./csdk_test
+           6e598388b217a94f966d8be9990ba6672d9fad61ee477ec5c8e5ac206c1c0ce7  ./libcsdk.so.0.0.4
